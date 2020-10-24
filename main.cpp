@@ -6,7 +6,6 @@
 #include <algorithm>
 
 #include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
 using namespace cv;
@@ -31,9 +30,8 @@ void conv2D(Mat, Mat, Mat&, int borderType = BORDER_DEFAULT);
 Mat gaussBlur(Mat, Size , float, int borderType = BORDER_DEFAULT);
 Mat getCloseWeight(double, Size);
 Mat bilateralFilter(const Mat&, Size, float, float);
-
-
 Mat sharpen(Mat);
+
 void img1Process(Mat, Mat&);
 void img2Process(Mat, Mat&);
 void img3Process(Mat, Mat&);
@@ -375,7 +373,7 @@ Mat changeSaturation(const Mat& input, double alpha, double beta)
 	return img_;
 }
 
-// ¨S¥Î¨ì ¥i¯à·|¬å±¼
+// ï¿½Sï¿½Î¨ï¿½ ï¿½iï¿½ï¿½|ï¿½å±¼
 Mat applyCLAHE(const Mat& input, double clipLimit, Size tileGridSize)
 {
 	Mat img_, output;
