@@ -72,7 +72,7 @@ int main(int argc, const char** argv) {
 	*/
 	int index = 0;
 	hconcat(images[index], results[index], img_show);
-	imshow("Result", images[0]);
+	imshow("Result", img_show);
 	int key = waitKey(0);
 	if (key == 27)
 		destroyAllWindows();
