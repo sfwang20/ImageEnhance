@@ -86,7 +86,7 @@ void img1Process(Mat img, Mat& output)
 	Mat img_;
 	// smoothing
 	img_ = bilateralFilter(img, Size(3, 3), 20, 20);
-	img_ = avgBlur(img, Size(3, 3), BORDER_REPLICATE);
+	img_ = medBlur(img, Size(3, 3), BORDER_REPLICATE);
 	// increase saturation
 	img_ = changeSaturation(img, 1.2, 0);
 	// intensity transformation
@@ -101,7 +101,7 @@ void img1Process(Mat img, Mat& output)
 void img2Process(Mat img, Mat& output)
 {
 	Mat img_;
-	img_ = avgBlur(img, Size(3, 3), BORDER_REPLICATE);	
+	img_ = gaussBlur(img, Size(3, 3), 1.0, BORDER_REPLICATE);	
 	linearTransform(img_, img_, 3.5, -70);	
 	img_ = sharpen(img_);	
 	output = img_;
@@ -111,7 +111,7 @@ void img3Process(Mat img, Mat& output)
 {
 	Mat img_;
 	// smoothing
-	img_ = avgBlur(img, Size(3, 3), BORDER_REPLICATE);
+	img_ = gaussBlur(img, Size(3, 3), 1.0, BORDER_REPLICATE);
 	// histogram normalize
 	normalize(img, img_);
 	// increase saturation
