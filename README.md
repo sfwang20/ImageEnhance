@@ -22,4 +22,4 @@ Implementation of image processing techniques for six low-quality image by using
 ![image](https://github.com/sfwang20/ImageEnhance/blob/master/results/img6.png)
 
 
-## The full report
+## [The full report] (https://drive.google.com/file/d/1XZ21qCYcGXveIUV09ofacwHYZ4ymLgjp/view?usp=sharing)
