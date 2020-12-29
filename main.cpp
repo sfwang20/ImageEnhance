@@ -14,6 +14,9 @@ using namespace std;
 
 enum class colorSpace { HSV, HSL, ycrcb, LAB};
 
+/******************************
+** intensity transform funcs **
+*******************************/
 void linearTransform(const Mat&, Mat&, double alpha = 1.0, double beta = 0);
 Mat calcHist(const Mat&);
 Mat equalHist(Mat, colorSpace);
@@ -22,13 +25,13 @@ void normalize(Mat, Mat&);
 void gammaCorrection(const Mat&, Mat&, double gamma = 1.0);
 Mat changeSaturation(const Mat&, double alpha = 1.0, double beta = 0);
 
-Mat applyCLAHE(const Mat& input, double clipLimit = 40.0, Size tileGridSize = Size(8,8));
+Mat applyCLAHE(const Mat& input, double clipLimit = 40.0, Size tile_grid_size = Size(8,8));
 void showHistogram(Mat);
 
-Mat avgBlur(const Mat&, Size, int borderType = BORDER_DEFAULT);
-Mat medBlur(const Mat&, Size, int borderType = BORDER_DEFAULT);
-void conv2D(Mat, Mat, Mat&, int borderType = BORDER_DEFAULT);
-Mat gaussBlur(Mat, Size , float, int borderType = BORDER_DEFAULT);
+Mat avgBlur(const Mat&, Size, int border_type = BORDER_DEFAULT);
+Mat medBlur(const Mat&, Size, int border_type = BORDER_DEFAULT);
+void conv2D(Mat, Mat, Mat&, int border_type = BORDER_DEFAULT);
+Mat gaussBlur(Mat, Size , float, int border_type = BORDER_DEFAULT);
 Mat getCloseWeight(double, Size);
 Mat bilateralFilter(const Mat&, Size, float, float);
 Mat sharpen(Mat);
@@ -44,9 +47,9 @@ int main(int argc, const char** argv) {
 	// Read the source images
 	Mat images[6];	
 	for (int i = 1; i <= 6; i++) {
-		string fileName("../images/p1im");
-		fileName = fileName + to_string(i) + ".png";
-		images[i-1] = imread(fileName);
+		string file_name("../images/p1im");
+		file_name = file_name + to_string(i) + ".png";
+		images[i - 1] = imread(file_name);
 		if (!images[i-1].data) {
 			cout << "Load image " << i << " failed! Please check and try again." << endl;
 			return EXIT_FAILURE;
@@ -83,79 +86,79 @@ int main(int argc, const char** argv) {
 /* image 1 ~ 6 processings */
 void img1Process(Mat img, Mat& output)
 {	
-	Mat img_;
+	Mat _img;
 	// smoothing
-	img_ = bilateralFilter(img, Size(3, 3), 20, 20);
-	img_ = medBlur(img, Size(3, 3), BORDER_REPLICATE);
+	_img = bilateralFilter(img, Size(3, 3), 20, 20);
+	_img = medBlur(img, Size(3, 3), BORDER_REPLICATE);
 	// increase saturation
-	img_ = changeSaturation(img, 1.2, 0);
+	_img = changeSaturation(img, 1.2, 0);
 	// intensity transformation
-	gammaCorrection(img_, img_, 2.5);
-	img_ = equalHist(img_, colorSpace::ycrcb);
-	gammaCorrection(img_, img_, 0.6);
-	linearTransform(img_, img_, 1.0, 40);
+	gammaCorrection(_img, _img, 2.5);
+	_img = equalHist(_img, colorSpace::ycrcb);
+	gammaCorrection(_img, _img, 0.6);
+	linearTransform(_img, _img, 1.0, 40);
 	
-	output = img_;
+	output = _img;
 }
 
 void img2Process(Mat img, Mat& output)
 {
-	Mat img_;
-	img_ = gaussBlur(img, Size(3, 3), 1.0, BORDER_REPLICATE);	
-	linearTransform(img_, img_, 3.5, -70);	
-	img_ = sharpen(img_);	
-	output = img_;
+	Mat _img;
+	_img = gaussBlur(img, Size(3, 3), 1.0, BORDER_REPLICATE);	
+	linearTransform(_img, _img, 3.5, -70);	
+	_img = sharpen(_img);	
+	output = _img;
 }
 
 void img3Process(Mat img, Mat& output)
 {
-	Mat img_;
+	Mat _img;
 	// smoothing
-	img_ = gaussBlur(img, Size(3, 3), 1.0, BORDER_REPLICATE);
+	_img = gaussBlur(img, Size(3, 3), 1.0, BORDER_REPLICATE);
 	// histogram normalize
-	normalize(img, img_);
+	normalize(img, _img);
 	// increase saturation
-	img_ = changeSaturation(img_, 1.0, 30);
+	_img = changeSaturation(_img, 1.0, 30);
 	// adjust intensity 
-	linearTransform(img_, img_, 1.0, -10);
+	linearTransform(_img, _img, 1.0, -10);
 	// sharpen the edge
-	img_ = sharpen(img_);
-	img_ = sharpen(img_);
-	output = img_;
+	_img = sharpen(_img);
+	_img = sharpen(_img);
+	output = _img;
 }
 
 void img4Process(Mat input, Mat& output)
 {
-	Mat img_;
+	Mat _img;
 	// intensity adjustment in HSV
-	cvtColor(input, img_, COLOR_BGR2HSV);
-	vector<Mat> chs;
-	split(img_, chs);
-	linearTransform(chs[2], chs[2], 1.5, 50);
-	merge(chs, img_);
-	cvtColor(img_, img_, COLOR_HSV2BGR);
+	cvtColor(input, _img, COLOR_BGR2HSV);
+	vector<Mat> channels;
+	split(_img, channels);
+	linearTransform(channels[2], channels[2], 1.5, 50);
+	merge(channels, _img);
+	cvtColor(_img, _img, COLOR_HSV2BGR);
 	// contrast adjustment
-	gammaCorrection(img_, img_, 1.2);
+	gammaCorrection(_img, _img, 1.2);
 	// sharpen
-	img_ = sharpen(img_);
-	output = img_;
+	_img = sharpen(_img);
+	output = _img;
 }
 
 void img5Process(Mat img, Mat& output)
 {
-	Mat img_;
-	img_ = equalHistRGB(img);	
-	linearTransform(img_, img_, 1.5, 20);
-	img_ = sharpen(img_);
-	output = img_;
+	Mat _img;
+	_img = equalHistRGB(img);	
+	linearTransform(_img, _img, 1.5, 20);
+	_img = sharpen(_img);
+	output = _img;
 }
 
 void img6Process(Mat img, Mat& output)
 {
-	Mat img_;
+	Mat _img;
 	// smoothing
-	bilateralFilter(img, img_, 20, 50, 50);
-	output = img_;
+	bilateralFilter(img, _img, 20, 50, 50);
+	output = _img;
 }
 
 /******************************
@@ -164,9 +167,9 @@ void img6Process(Mat img, Mat& output)
 
 void linearTransform(const Mat& input, Mat& output, double alpha, double beta)
 {
-	Mat input_ = input.clone();
-	input_.convertTo(input_, CV_32F);
-	output = (input_ / 255.f) * alpha + beta/255.f;
+	Mat _img = input.clone();
+	_img.convertTo(_img, CV_32F);
+	output = (_img / 255.f) * alpha + beta/255.f;
 	output *= 255.f;
 	output.convertTo(output, CV_8U);
 }
@@ -192,22 +195,22 @@ void showHistogram(Mat img)
 	split(img, img_channels);
 
 	// 256 bins (the number of possibles values)
-	const int numbins = 256;
+	const int num_bins = 256;
 
 	// Set the ranges for B,G,R
 	float range[] = { 0, 256 };
-	const float* histRange = { range };
+	const float* hist_range = { range };
 
 	Mat b_hist, g_hist, r_hist;
 
-	cv::calcHist(&img_channels[0], 1, 0, Mat(), b_hist, 1, &numbins, &histRange);
-	cv::calcHist(&img_channels[1], 1, 0, Mat(), g_hist, 1, &numbins, &histRange);
-	cv::calcHist(&img_channels[2], 1, 0, Mat(), r_hist, 1, &numbins, &histRange);
+	cv::calcHist(&img_channels[0], 1, 0, Mat(), b_hist, 1, &num_bins, &hist_range);
+	cv::calcHist(&img_channels[1], 1, 0, Mat(), g_hist, 1, &num_bins, &hist_range);
+	cv::calcHist(&img_channels[2], 1, 0, Mat(), r_hist, 1, &num_bins, &hist_range);
 
 	// Draw the histogram
 	const int width = 512;
 	const int height = 300;
-	Mat histImage(height, width, CV_8UC3, Scalar(20, 20, 20));
+	Mat hist_image(height, width, CV_8UC3, Scalar(20, 20, 20));
 
 	// Normalize the histograms to height of image
 	normalize(b_hist, b_hist, 0, height, NORM_MINMAX);
@@ -215,32 +218,32 @@ void showHistogram(Mat img)
 	normalize(r_hist, r_hist, 0, height, NORM_MINMAX);
 
 	// draw lines for each channel
-	int binStep = cvRound((float)width / (float)numbins);
-	for (int i = 1; i < numbins; i++)
+	int bin_step = cvRound((float)width / (float)num_bins);
+	for (int i = 1; i < num_bins; i++)
 	{
-		line(histImage,
-			Point(binStep * (i - 1), height - cvRound(b_hist.at<float>(i - 1))),
-			Point(binStep * (i), height - cvRound(b_hist.at<float>(i))),
+		line(hist_image,
+			Point(bin_step * (i - 1), height - cvRound(b_hist.at<float>(i - 1))),
+			Point(bin_step * (i), height - cvRound(b_hist.at<float>(i))),
 			Scalar(255, 0, 0)
 		);
-		line(histImage,
-			Point(binStep * (i - 1), height - cvRound(g_hist.at<float>(i - 1))),
-			Point(binStep * (i), height - cvRound(g_hist.at<float>(i))),
+		line(hist_image,
+			Point(bin_step * (i - 1), height - cvRound(g_hist.at<float>(i - 1))),
+			Point(bin_step * (i), height - cvRound(g_hist.at<float>(i))),
 			Scalar(0, 255, 0)
 		);
-		line(histImage,
-			Point(binStep * (i - 1), height - cvRound(r_hist.at<float>(i - 1))),
-			Point(binStep * (i), height - cvRound(r_hist.at<float>(i))),
+		line(hist_image,
+			Point(bin_step * (i - 1), height - cvRound(r_hist.at<float>(i - 1))),
+			Point(bin_step * (i), height - cvRound(r_hist.at<float>(i))),
 			Scalar(0, 0, 255)
 		);
 	}
-	imshow("Histogram", histImage);
+	imshow("Histogram", hist_image);
 	waitKey(0);
 }
 
 Mat equalHist(Mat img, colorSpace space)
 {
-	int code, code_r, ch;
+	int code, code_r, channel;
 	switch (space) {
 		case colorSpace::HSV:
 			code = COLOR_BGR2HSV;
@@ -263,10 +266,9 @@ Mat equalHist(Mat img, colorSpace space)
 	Mat intensity, img_cvt;
 	cvtColor(img, img_cvt, code);
 	split(img_cvt, img_channels);
-	ch = (space == colorSpace::ycrcb || space == colorSpace::LAB) ? 0 : 2;
+	channel = (space == colorSpace::ycrcb || space == colorSpace::LAB) ? 0 : 2;
 
-	intensity = img_channels[ch];
-	
+	intensity = img_channels[channel];
 	CV_Assert(intensity.type() == CV_8UC1);
 	const int rows = intensity.rows;
 	const int cols = intensity.cols;
@@ -275,11 +277,9 @@ Mat equalHist(Mat img, colorSpace space)
 
 	// calculate cdf
 	Mat cdf = Mat::zeros(Size(256, 1), CV_32SC1);
-	for (int p = 0; p < 256; p++) {
-		if (p == 0)
-			cdf.at<int>(0, p) = hist.at<int>(0, 0);
-		else
-			cdf.at<int>(0, p) = cdf.at<int>(0, p - 1) + hist.at<int>(0, p);
+	cdf.at<int>(0, 0) = hist.at<int>(0, 0);
+	for (int p = 1; p < 256; p++) {
+		cdf.at<int>(0, p) = cdf.at<int>(0, p - 1) + hist.at<int>(0, p);
 	}
 
 	Mat lut_table(1, 256, CV_8UC1);
@@ -294,7 +294,7 @@ Mat equalHist(Mat img, colorSpace space)
 
 	Mat intensity_e, output;
 	LUT(intensity, lut_table, intensity_e);
-	img_channels[ch] = intensity_e;
+	img_channels[channel] = intensity_e;
 	merge(img_channels, output);
 	cvtColor(output, output, code_r);
 
@@ -344,7 +344,6 @@ void normalize(Mat img, Mat& output)
 	const double output_min = 0, output_max = 255;
 	const double a = (output_max - output_min) / (input_max - input_min);
 	const double b = output_min - a * input_min;
-	// cout << "a, b: " << a << ", " << b;
 	linearTransform(img, output, a, b);
 }
 
@@ -359,44 +358,40 @@ void gammaCorrection(const Mat& input, Mat& output, double gamma)
 
 Mat changeSaturation(const Mat& input, double alpha, double beta) 
 {
-	Mat img_;
-	cvtColor(input, img_, COLOR_BGR2HSV);
+	Mat _img;
+	cvtColor(input, _img, COLOR_BGR2HSV);
 	vector<Mat> imgs;
-	split(img_, imgs);
+	split(_img, imgs);
 	Mat saturation = imgs[1];
 	saturation.convertTo(saturation, CV_32FC1);
 	saturation = (saturation / 255.f) * alpha + beta / 255.f;
 	saturation *= 255;
 	saturation.convertTo(saturation, CV_8UC1);
 	imgs[1] = saturation;
-	merge(imgs, img_);
-	cvtColor(img_, img_, COLOR_HSV2BGR);
-	return img_;
+	merge(imgs, _img);
+	cvtColor(_img, _img, COLOR_HSV2BGR);
+	return _img;
 }
 
-// �S�Ψ� �i��|�屼
-Mat applyCLAHE(const Mat& input, double clipLimit, Size tileGridSize)
+Mat applyCLAHE(const Mat& input, double clipLimit, Size tile_grid_size)
 {
-	Mat img_, output;
-	cvtColor(input, img_, COLOR_BGR2HSV);
-	vector<Mat> img_chs;
-	split(img_, img_chs);
+	Mat _img, output;
+	cvtColor(input, _img, COLOR_BGR2HSV);
+	vector<Mat> img_channels;
+	split(_img, img_channels);
 	// apply CLAHE
-	Ptr<CLAHE> clahe = createCLAHE(clipLimit, tileGridSize);
-	clahe->apply(img_chs[2], img_chs[2]);
-	merge(img_chs, output);
-	cvtColor(output, output, COLOR_HSV2BGR);
-
+	Ptr<CLAHE> clahe = createCLAHE(clipLimit, tile_grid_size);
+	clahe->apply(img_channels[2], img_channels[2]);
+	merge(img_channels, _img);
+	cvtColor(_img, output, COLOR_HSV2BGR);
 	return output;
 }
-
 
 /******************************
 **     denoise functions     **
 *******************************/
 
-
-Mat avgBlur(const Mat& input, Size ksize, int borderType)
+Mat avgBlur(const Mat& input, Size ksize, int border_type)
 {
 	CV_Assert(input.channels() == 3);
 	const int rows = input.rows;
@@ -404,7 +399,7 @@ Mat avgBlur(const Mat& input, Size ksize, int borderType)
 	const int h = (ksize.height - 1) / 2;
 	const int w = (ksize.width - 1) / 2;
 	Mat output(rows, cols, CV_32FC3), img_border, region;
-	copyMakeBorder(input, img_border, h, h, w, w, borderType);
+	copyMakeBorder(input, img_border, h, h, w, w, border_type);
 
 	for (int r = h; r < h + rows; r++) {
 		for (int c = w; c < w + cols; c++) {
@@ -418,9 +413,8 @@ Mat avgBlur(const Mat& input, Size ksize, int borderType)
 	return output;
 }
 
-Mat medBlur(const Mat& input, Size ksize, int borderType)
+Mat medBlur(const Mat& input, Size ksize, int border_type)
 {
-	//CV_Assert(input.type() == CV_8UC3);
 	const int H = ksize.height;
 	const int W = ksize.width;
 	CV_Assert(H > 0 && W > 0);
@@ -436,16 +430,16 @@ Mat medBlur(const Mat& input, Size ksize, int borderType)
 	vector<Mat> img_chs;
 	split(input, img_chs);
 	Mat b(input.size(), CV_8UC1), g(input.size(), CV_8UC1), r(input.size(), CV_8UC1);
-	vector<Mat> output_chs{ b, g, r };
+	vector<Mat> channels{ b, g, r };
 	Mat output(input.size(), CV_8UC1);
 
 	for (int cn = 0; cn < 3; cn++) {
-		copyMakeBorder(img_chs[cn], img_chs[cn], h, h, w, w, borderType);
+		copyMakeBorder(img_chs[cn], img_chs[cn], h, h, w, w, border_type);
 		for (int r = h; r < h + rows; r++) {
 			for (int c = w; c < w + cols; c++) {
 				Mat kernel = img_chs[cn](Rect(c - w, r - h, W, H)).clone().reshape(1, 1);
 				cv::sort(kernel, kernel, SORT_EVERY_ROW);
-				output_chs[cn].at<uchar>(i, j) = kernel.at<uchar>(0, index);
+				channels[cn].at<uchar>(i, j) = kernel.at<uchar>(0, index);
 				j++;
 			}
 			i++;
@@ -453,11 +447,11 @@ Mat medBlur(const Mat& input, Size ksize, int borderType)
 		}
 		i = j = 0;
 	}
-	merge(output_chs, output);
+	merge(channels, output);
 	return output;
 }
 
-void conv2D(Mat input, Mat kernel, Mat& output, int borderType)
+void conv2D(Mat input, Mat kernel, Mat& output, int border_type)
 {
 	CV_Assert(input.channels() == 3);
 	const int rows = input.rows;
@@ -471,24 +465,24 @@ void conv2D(Mat input, Mat kernel, Mat& output, int borderType)
 	vector<Mat> input_chs;
 	split(input, input_chs);
 	for (Mat& m : input_chs) {
-		copyMakeBorder(m, m, h, h, w, w, borderType);
+		copyMakeBorder(m, m, h, h, w, w, border_type);
 	}
 
 	Mat b(input.size(), CV_64FC1), g(input.size(), CV_64FC1), r(input.size(), CV_64FC1);
-	vector<Mat> output_chs{ b, g, r };
+	vector<Mat> channels{ b, g, r };
 
 	for (int ch = 0; ch < 3; ch++) {
 		for (int r = h; r < h + rows; r++) {
 			for (int c = w; c < w + cols; c++) {
 				input_chs[ch](Rect(c - w, r - h, kernel_w, kernel_h)).convertTo(region, CV_64FC1);				
-				output_chs[ch].at<double>(r - h, c - w) = (double) region.dot(kernel);
+				channels[ch].at<double>(r - h, c - w) = (double) region.dot(kernel);
 			}
 		}
 	}
-	merge(output_chs, output);
+	merge(channels, output);
 }
 
-Mat gaussBlur(Mat input, Size ksize, float sigma, int borderType)
+Mat gaussBlur(Mat input, Size ksize, float sigma, int border_type)
 {
 	CV_Assert(input.channels() == 3);
 	CV_Assert(ksize.width % 2 == 1 && ksize.height % 2 == 1);
@@ -543,41 +537,40 @@ Mat bilateralFilter(const Mat& input, Size winSize, float sigma_g, float sigma_d
 	vector<Mat> img_chs;
 	split(input_cp, img_chs);
 	Mat b(input.size(), CV_32FC1), g(input.size(), CV_32FC1), r(input.size(), CV_32FC1), output;
-	vector<Mat> output_chs{ b, g, r };
+	vector<Mat> channels{ b, g, r };
 	
 	for (int cn = 0; cn < 3; cn++) {
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
 				double pixel = img_chs[cn].at<float>(r, c);
-				int rTop = (r - h) < 0 ? 0 : r - h;
-				int rBottom = (r + h) > rows - 1 ? rows - 1 : r + h;
-				int cLeft = (c - w) < 0 ? 0 : c - w;
-				int cRight = (c + w) > cols - 1 ? cols - 1 : c + w;
+				int right_top = (r - h) < 0 ? 0 : r - h;
+				int right_bottom = (r + h) > rows - 1 ? rows - 1 : r + h;
+				int c_left = (c - w) < 0 ? 0 : c - w;
+				int c_right = (c + w) > cols - 1 ? cols - 1 : c + w;
 
-				Mat region = img_chs[cn](Rect(Point(cLeft, rTop),
-											  Point(cRight + 1, rBottom + 1))).clone();				
+				Mat region = img_chs[cn](Rect(Point(c_left, right_top),
+											  Point(c_right + 1, right_bottom + 1))).clone();				
 				Mat similarityWeight;
 				pow(region - pixel, 2.0, similarityWeight);
 				exp(-0.5 * similarityWeight / pow(sigma_d, 2), similarityWeight);
 				similarityWeight /= pow(sigma_d, 2);
 
-				Rect regionRect = Rect(Point(cLeft - c + w, rTop - r + h),
-									   Point(cRight - c + w + 1, rBottom - r + h + 1));
+				Rect regionRect = Rect(Point(c_left - c + w, right_top - r + h),
+									   Point(c_right - c + w + 1, right_bottom - r + h + 1));
 				Mat closeWeightTemp;
 				closeWeight(regionRect).clone().convertTo(closeWeightTemp, CV_32F);
 				Mat weightTemp = (closeWeightTemp.mul(similarityWeight));
 				weightTemp /= sum(weightTemp)[0];
 
 				Mat result = weightTemp.mul(region);
-				output_chs[cn].at<float>(r, c) = sum(result)[0];
+				channels[cn].at<float>(r, c) = sum(result)[0];
 			}
 		}
 	}
-	merge(output_chs, output);
+	merge(channels, output);
 	output.convertTo(output, CV_8UC3);
 	return output;
 }
-
 
 Mat sharpen(Mat input)
 {
